@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, HomeActivity!</string>
-    <string name="app_name">Trojan</string>
-    <string name="finder">I Need A Condom! QUICK!</string>
-    <string name="list">Trojan Products</string>
-	<string name="navigate">Navigate Here</string>
+    <string name="app_name">Store Finder</string>
 </resources>

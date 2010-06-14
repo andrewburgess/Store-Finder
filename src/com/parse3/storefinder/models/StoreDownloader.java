@@ -24,12 +24,14 @@ import com.parse3.storefinder.Program;
 
 public class StoreDownloader {
 	private Context context;
-	private SQLiteDatabase database;
+	private Database database;
+	private SQLiteDatabase db;
 	
 	public StoreDownloader(Context context) {
 		this.context = context;
 		
-		database = new Database(context).getDatabase();
+		database = new Database(context).open();
+		db = database.getDatabase();
 	}
 	
 	public void downloadStores() {
@@ -49,7 +51,7 @@ public class StoreDownloader {
 			for (int i = 0; i < jStores.length(); i++) {
 				JSONObject jStore = jStores.getJSONObject(i);
 				
-				Cursor cursor = database.query("store", new String[] {"id"}, "id = ?", 
+				Cursor cursor = db.query("store", new String[] {"id"}, "id = ?", 
 												new String[] {jStore.getString("storeid")}, 
 												null, null, null);
 				cursor.moveToFirst();
@@ -79,7 +81,7 @@ public class StoreDownloader {
 					Log.e(Program.LOG, "ERROR: geocoder.getFromLocationName() - " + e.getMessage());
 				}
 				
-				database.insert("store", null, cv);
+				db.insert("store", null, cv);
 			}
 		} catch (JSONException e) {
 			Log.e(Program.LOG, "ERROR: downloadStores - " + e.getMessage());

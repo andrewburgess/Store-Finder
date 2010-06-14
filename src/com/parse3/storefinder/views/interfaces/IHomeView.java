@@ -5,5 +5,9 @@ import android.content.Context;
 public interface IHomeView {
 
 	Context getContext();
+
+	void showDialog();
+
+	void hideDialog();
 	
 }

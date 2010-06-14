@@ -28,7 +28,16 @@ public class SplashScreenController {
 			StoreDownloader downloader = new StoreDownloader(view.getContext());
 			downloader.downloadStores();
 			
+			SharedPreferences prefs = view.getContext().getSharedPreferences(Program.PREFERENCES, 0);
 			
+			//Whether we're getting stores for the first time, or just refreshing the stores in the
+			//database
+			if (!prefs.contains(Program.Preferences.SETUP))
+				m.what = 0;
+			else
+				m.what = 1;
+			
+			handler.sendMessage(m);
 		}
 	};
 	
@@ -36,7 +45,17 @@ public class SplashScreenController {
 		public void handleMessage(Message msg) {
 			Log.v(Program.LOG, "handler.handleMessage()");
 			
-			
+			switch (msg.what) {
+				case 0:
+					view.hideDialog();
+					
+					//TODO: Start up new activity
+					
+					break;
+				case 1:
+					//Nothing really to do in this case
+					break;
+			}
 		}
 	};
 	

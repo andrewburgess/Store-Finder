@@ -2,6 +2,7 @@ package com.parse3.storefinder.views;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,5 +34,15 @@ public class SplashActivity extends Activity implements IHomeView {
 	@Override
 	public Context getContext() {
 		return this;
+	}
+
+	@Override
+	public void hideDialog() {
+		progressDialog.dismiss();		
+	}
+
+	@Override
+	public void showDialog() {
+		progressDialog = ProgressDialog.show(this, "", "Initializing application...", true);		
 	}
 }
