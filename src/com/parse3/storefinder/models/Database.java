@@ -12,13 +12,18 @@ public class Database {
 	private static class DatabaseHelper extends SQLiteOpenHelper {
 		public DatabaseHelper(Context context) {
 			super(context, Program.DatabaseInfo.NAME, null, Program.DatabaseInfo.VERSION);
+			
+			Log.v(Program.LOG, "DatabaseHelper._construct()");
 		}
 		
 		@Override
 		public void onCreate(SQLiteDatabase db) {
+			Log.v(Program.LOG, "DatabaseHelper.onCreate()");
+			
 			Log.i(Program.LOG, "Creating database");
 			String sql = "create table store (" +
-								"id text primary key, " +
+								"_id integer primary key autoincrement, " +
+								"storeid text, " +
 								"name text, " +
 								"address text," +
 								"city text, " +

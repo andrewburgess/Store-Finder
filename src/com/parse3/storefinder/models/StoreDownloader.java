@@ -28,6 +28,8 @@ public class StoreDownloader {
 	private SQLiteDatabase db;
 	
 	public StoreDownloader(Context context) {
+		Log.v(Program.LOG, "StoreDownloader._construct()");
+		
 		this.context = context;
 		
 		database = new Database(context).open();
@@ -35,6 +37,8 @@ public class StoreDownloader {
 	}
 	
 	public void downloadStores() {
+		Log.v(Program.LOG, "StoreDownloader.downloadStores()");
+		
 		String data = "";
 		try {
 			URL u = new URL(Program.StoreDownloaderInfo.URL);
@@ -51,7 +55,7 @@ public class StoreDownloader {
 			for (int i = 0; i < jStores.length(); i++) {
 				JSONObject jStore = jStores.getJSONObject(i);
 				
-				Cursor cursor = db.query("store", new String[] {"id"}, "id = ?", 
+				Cursor cursor = db.query("store", new String[] {"storeid"}, "storeid = ?", 
 												new String[] {jStore.getString("storeid")}, 
 												null, null, null);
 				cursor.moveToFirst();
@@ -62,7 +66,7 @@ public class StoreDownloader {
 				cursor.close();
 				
 				cv = new ContentValues();
-				cv.put("id", jStore.getString("storeid"));
+				cv.put("storeid", jStore.getString("storeid"));
 				cv.put("name", jStore.getString("name"));
 				cv.put("address", jStore.getString("address"));
 				cv.put("city", jStore.getString("city"));
@@ -89,6 +93,8 @@ public class StoreDownloader {
 	}
 	
 	private InputStream openConnection(URL url) {
+		Log.v(Program.LOG, "StoreDownloader.openConnection()");
+		
 		try {
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			HttpURLConnection.setFollowRedirects(true);
@@ -113,6 +119,8 @@ public class StoreDownloader {
 	}
 	
 	private String readData(InputStream in) {
+		Log.v(Program.LOG, "StoreDownloader.readData()");
+		
 		InputStreamReader reader = new InputStreamReader(in);
 		int charRead;
 		String data = "";
