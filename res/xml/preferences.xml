@@ -11,7 +11,7 @@
 			android:dialogMessage="How many miles to search in?"
 			android:defaultValue="20"
 			android:text=" miles"
-			android:max="500" />
+			android:max="80" />
 		
 	</PreferenceCategory>
   

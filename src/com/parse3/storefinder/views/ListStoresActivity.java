@@ -8,6 +8,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -56,7 +57,7 @@ public class ListStoresActivity extends ListActivity implements IListStoresView 
 			tvDistance.setText(Program.round(s.getDistance(), 2) + " miles");
 			tvName.setText(s.getName());
 			tvAddress.setText(s.getAddress());
-			tvPhone.setText(s.getPhone());
+			tvPhone.setText(PhoneNumberUtils.formatNumber(s.getPhone()));
 			tvCity.setText(s.getCitystate());
 		
 			return view;

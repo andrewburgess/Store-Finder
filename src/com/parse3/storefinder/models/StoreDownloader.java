@@ -18,6 +18,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.parse3.storefinder.Program;
@@ -39,60 +41,65 @@ public class StoreDownloader {
 	public void downloadStores() {
 		Log.v(Program.LOG, "StoreDownloader.downloadStores()");
 		
-		String data = "";
-		try {
-			URL u = new URL(Program.StoreDownloaderInfo.URL);
-			data = readData(openConnection(u));
-		} catch (MalformedURLException e) {
-			Log.e(Program.LOG, "ERROR: downloadStores - " + e.getMessage());
-		}
-		
-		try {
-			ContentValues cv;
-			Geocoder gc = new Geocoder(context, Locale.getDefault());
-			JSONObject json = new JSONObject(data);
-			JSONArray jStores = json.getJSONArray("store");
-			for (int i = 0; i < jStores.length(); i++) {
-				JSONObject jStore = jStores.getJSONObject(i);
-				
-				Cursor cursor = db.query("store", new String[] {"storeid"}, "storeid = ?", 
-												new String[] {jStore.getString("storeid")}, 
-												null, null, null);
-				
-				cursor.moveToFirst();
-				if (cursor.getCount() > 0) {
-					cursor.close();
-					continue;
-				}
-				
-				cursor.close();
-				
-				cv = new ContentValues();
-				cv.put("storeid", jStore.getString("storeid"));
-				cv.put("name", jStore.getString("name"));
-				cv.put("address", jStore.getString("address"));
-				cv.put("city", jStore.getString("city"));
-				cv.put("state", jStore.getString("state"));
-				cv.put("zip", jStore.getString("zip"));
-				cv.put("phone", jStore.getString("phone"));
-				
-				try {
-					Address address = gc.getFromLocationName(jStore.getString("address") + ", " + 
-															 jStore.getString("city") + ", " +
-															 jStore.getString("state") + " " + 
-															 jStore.getString("zip"), 1).get(0);
-					cv.put("latitude", address.getLatitude());
-					cv.put("longitude", address.getLongitude());
-				} catch (IOException e) {
-					Log.e(Program.LOG, "ERROR: geocoder.getFromLocationName() - " + e.getMessage());
-				}
-				
-				db.insert("store", null, cv);
+		NetworkInfo mobile = ((ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE)).getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+		NetworkInfo wifi = ((ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE)).getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+		if (mobile.getState() == NetworkInfo.State.CONNECTED || wifi.getState() == NetworkInfo.State.CONNECTED) {
+			String data = "";
+			try {
+				URL u = new URL(Program.StoreDownloaderInfo.URL);
+				data = readData(openConnection(u));
+			} catch (MalformedURLException e) {
+				Log.e(Program.LOG, "ERROR: downloadStores - " + e.getMessage());
 			}
 			
-			database.close();
-		} catch (JSONException e) {
-			Log.e(Program.LOG, "ERROR: downloadStores - " + e.getMessage());
+			try {
+				ContentValues cv;
+				Geocoder gc = new Geocoder(context, Locale.getDefault());
+				JSONObject json = new JSONObject(data);
+				JSONArray jStores = json.getJSONArray("store");
+				for (int i = 0; i < jStores.length(); i++) {
+					JSONObject jStore = jStores.getJSONObject(i);
+					
+					Cursor cursor = db.query("store", new String[] {"storeid"}, "storeid = ?", 
+													new String[] {jStore.getString("storeid")}, 
+													null, null, null);
+					
+					cursor.moveToFirst();
+					if (cursor.getCount() > 0) {
+						cursor.close();
+						continue;
+					}
+					
+					cursor.close();
+					
+					cv = new ContentValues();
+					cv.put("storeid", jStore.getString("storeid"));
+					cv.put("name", jStore.getString("name"));
+					cv.put("address", jStore.getString("address"));
+					cv.put("city", jStore.getString("city"));
+					cv.put("state", jStore.getString("state"));
+					cv.put("zip", jStore.getString("zip"));
+					cv.put("phone", jStore.getString("phone"));
+					
+					try {
+						Address address = gc.getFromLocationName(jStore.getString("address") + ", " + 
+																 jStore.getString("city") + ", " +
+																 jStore.getString("state") + " " + 
+																 jStore.getString("zip"), 1).get(0);
+						cv.put("latitude", address.getLatitude());
+						cv.put("longitude", address.getLongitude());
+					} catch (IOException e) {
+						Log.e(Program.LOG, "ERROR: geocoder.getFromLocationName() - " + e.getMessage());
+					}
+					
+					db.insert("store", null, cv);
+				}
+				
+				database.close();
+			} catch (JSONException e) {
+				Log.e(Program.LOG, "ERROR: downloadStores - " + e.getMessage());
+			}
 		}
 	}
 	

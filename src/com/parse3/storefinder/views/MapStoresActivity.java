@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -202,7 +203,7 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 		citystate.setText(s.getCitystate());
 		
 		TextView phone = (TextView)findViewById(R.id.store_phone);
-		phone.setText("Phone: " + s.getPhone());
+		phone.setText("Phone: " + PhoneNumberUtils.formatNumber(s.getPhone()));
 
 		ImageButton navigate = (ImageButton)findViewById(R.id.navigate_to);
 		navigate.setOnClickListener(navigateToOnClickListener);
