@@ -53,6 +53,8 @@ public class SplashScreenController {
 					
 					//TODO: Start up new activity
 					
+					cleanUp();
+					
 					Intent intent = new Intent(view.getContext(), FinderTabsActivity.class);
 					view.getContext().startActivity(intent);
 					
@@ -61,6 +63,10 @@ public class SplashScreenController {
 					break;
 				case 1:
 					//Nothing really to do in this case
+					cleanUp();
+					
+					view.finish();
+					
 					break;
 			}
 		}
@@ -83,8 +89,6 @@ public class SplashScreenController {
 		} else {
 			Intent intent = new Intent(view.getContext(), FinderTabsActivity.class);
 			view.getContext().startActivity(intent);
-			
-			view.finish();
 		}
 	}
 	

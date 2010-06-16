@@ -58,8 +58,10 @@ public class StoreDownloader {
 				Cursor cursor = db.query("store", new String[] {"storeid"}, "storeid = ?", 
 												new String[] {jStore.getString("storeid")}, 
 												null, null, null);
+				
 				cursor.moveToFirst();
 				if (cursor.getCount() > 0) {
+					cursor.close();
 					continue;
 				}
 				
@@ -87,6 +89,8 @@ public class StoreDownloader {
 				
 				db.insert("store", null, cv);
 			}
+			
+			database.close();
 		} catch (JSONException e) {
 			Log.e(Program.LOG, "ERROR: downloadStores - " + e.getMessage());
 		}

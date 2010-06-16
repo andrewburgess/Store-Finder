@@ -9,6 +9,7 @@ import android.location.Location;
 
 public class Store implements Comparator<Store>, Serializable {
 	private static final long serialVersionUID = -2836075365060996971L;
+	private int id;
 	private String name;
 	private String address;
 	private String citystate;
@@ -66,5 +67,13 @@ public class Store implements Comparator<Store>, Serializable {
 			return -1;
 		else
 			return 0;
+	}
+	
+	public int getId() {
+		return id;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
 	}
 }

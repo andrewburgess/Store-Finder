@@ -13,14 +13,19 @@ import com.parse3.storefinder.Program;
 import com.parse3.storefinder.StoreFinderApplication;
 import com.parse3.storefinder.models.Database;
 import com.parse3.storefinder.models.Store;
+import com.parse3.storefinder.models.StoreDownloader;
 import com.parse3.storefinder.views.interfaces.IListStoresView;
 
 public class ListStoresController {
+	private static final int WHAT_SEARCHDB = 0;
+	private static final int WHAT_DOWNLOAD = 1;
+	
 	private IListStoresView view;
 	private Database database;
 	private SQLiteDatabase db;
 	
-	private Thread searchStoresThread = new Thread() {
+	private class DatabaseSearcher implements Runnable {
+		@Override
 		public void run() {
 			Location l = StoreFinderApplication.getLocationManager().getLastKnownLocation(LocationManager.GPS_PROVIDER);
 			
@@ -31,12 +36,13 @@ public class ListStoresController {
 			double lat = l.getLatitude();
 			double lon = l.getLongitude();
 			
+			database = database.open();
+			db = database.getDatabase();
+			
 			Cursor c = db.query("store", new String[] {"_id", "name", "address", "city", "state", "zip", "phone", "latitude", "longitude"}, 
 								"latitude > " + (lat - 0.5) + " AND latitude < " + (lat + 0.5) + 
 								" AND longitude > " + (lon - 0.5) + " AND longitude < " + (lon + 0.5), 
 								null, null, null, null);
-			
-			//ArrayList<Store> stores = new ArrayList<Store>();
 			
 			double latitude, longitude;
 			
@@ -52,6 +58,7 @@ public class ListStoresController {
 					continue;
 				
 				Store store = new Store();
+				store.setId(c.getInt(0));
 				store.setName(c.getString(1));
 				store.setAddress(c.getString(2));
 				store.setCitystate(c.getString(3) + ", " + c.getString(4) + " " + c.getString(5));
@@ -62,21 +69,43 @@ public class ListStoresController {
 				Bundle b = new Bundle();
 				b.putSerializable("store", store);
 				msg.setData(b);
-				msg.what = 0;
+				msg.what = WHAT_SEARCHDB;
 				handler.sendMessage(msg);
 			} while (c.moveToNext());
 			
 			c.close();
+			database.close();
 		}
-	};
+	}
+	
+	
+	private class StoreRefresher implements Runnable {
+		public void run() {
+			Log.i(Program.LOG, "downloadStoresThread.run()");
+			
+			Message m = new Message();
+			
+			StoreDownloader downloader = new StoreDownloader(view.getContext());
+			downloader.downloadStores();
+			
+			m.what = WHAT_DOWNLOAD;
+					
+			handler.sendMessage(m);
+		}
+	}
+	
 	
 	private Handler handler = new Handler() {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-				case 0:
+				case WHAT_SEARCHDB:
 					Store s = (Store) msg.getData().getSerializable("store");
 					view.addStoreToList(s);
 					
+					break;
+				case WHAT_DOWNLOAD:
+					bindData();
+					view.hideDialog();
 					break;
 			}
 		}
@@ -87,52 +116,18 @@ public class ListStoresController {
 		
 		this.view = view;
 		
-		database = new Database(view.getContext()).open();
-		db = database.getDatabase();
+		database = new Database(view.getContext());
 	}
 
 	public void bindData() {
 		Log.v(Program.LOG, "ListStoresController.bindData()");
 		
-		view.initializeList();
-		searchStoresThread.run();
-		
-		/*Location l = StoreFinderApplication.getLocationManager().getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		
-		if (l == null) {
-			l = StoreFinderApplication.getLocationManager().getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		}
-		
-		double lat = l.getLatitude();
-		double lon = l.getLongitude();
-		
-		Cursor c = db.query("store", new String[] {"_id", "name", "address", "city", "state", "zip", "phone", "latitude", "longitude"}, 
-							"latitude > " + (lat - 0.5) + " AND latitude < " + (lat + 0.5) + 
-							" AND longitude > " + (lon - 0.5) + " AND longitude < " + (lon + 0.5), 
-							null, null, null, null);
-		
-		ArrayList<Store> stores = new ArrayList<Store>();
-		
-		double latitude, longitude;
-		
-		c.moveToFirst();
-		while (c.isAfterLast() == false) {
-			latitude = c.getDouble(7);
-			longitude = c.getDouble(8);
-			float[] results = new float[3];
-			Location.distanceBetween(lat, lon, latitude, longitude, results);
-			double distance = results[0] * Program.MILES_PER_METER;
-			
-			if (distance > 15)				//Make user customizable search distance
-				continue;
-			
-			
-		}*/
-		
-		//view.setCursor(c);
+		new Thread(new DatabaseSearcher()).start();
 	}
 	
 	public Location getLocation() {
+		Log.v(Program.LOG, "ListStoresController.getLocation()");
+		
 		Location l = StoreFinderApplication.getLocationManager().getLastKnownLocation(LocationManager.GPS_PROVIDER);
 		
 		if (l == null) {
@@ -140,5 +135,12 @@ public class ListStoresController {
 		}
 		
 		return l;
+	}
+
+	public void refreshStores() {
+		Log.v(Program.LOG, "ListStoresController.refreshStores()");
+		
+		view.showDialog();
+		new Thread(new StoreRefresher()).start();
 	}
 }

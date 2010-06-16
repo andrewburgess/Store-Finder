@@ -3,6 +3,10 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="fill_parent"
   android:layout_height="wrap_content"
+  android:paddingTop="5dp"
+  android:paddingBottom="5dp"
+  android:paddingLeft="2dp"
+  android:paddingRight="2dp"
   android:orientation="horizontal">
   
 	<LinearLayout
@@ -14,7 +18,10 @@
   		<TextView
 			android:id="@+id/name"
 			android:layout_height="wrap_content"
-			android:textSize="14dp" android:layout_width="wrap_content"/>
+			android:layout_width="wrap_content"
+			android:textStyle="bold"
+			android:textColor="@android:color/white"
+			android:textSize="14dp" />
 			
 		<TextView
 			android:id="@+id/address"
@@ -39,9 +46,10 @@
 		android:id="@+id/distance"
 		android:layout_height="wrap_content"
 		android:layout_alignParentRight="true"
+		android:layout_marginRight="10dp"
 		android:gravity="right"
 		android:textColor="@android:color/white"
 		android:textStyle="bold"
-		android:textSize="24dp" android:layout_width="fill_parent" android:layout_gravity="bottom|right"/>
+		android:textSize="20dp" android:layout_width="fill_parent" android:layout_gravity="bottom|right"/>
   
 </LinearLayout>
