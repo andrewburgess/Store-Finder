@@ -15,6 +15,7 @@
 <activity android:name=".views.ListStoresActivity"></activity>
 <activity android:name=".views.MapStoresActivity"></activity>
 
+<activity android:name=".views.SettingsActivity"></activity>
 </application>
     <uses-sdk android:minSdkVersion="4" />
 

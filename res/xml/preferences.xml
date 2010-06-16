@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+  
+	<PreferenceCategory android:title="Application Options">
+		
+		<com.parse3.storefinder.views.controls.SeekBarPreference
+			android:key="@string/radius"
+			android:title="Radius of Search"
+			android:summary="Miles to search around location"
+			android:dialogMessage="How many miles to search in?"
+			android:defaultValue="20"
+			android:text=" miles"
+			android:max="500" />
+		
+	</PreferenceCategory>
+  
+	<PreferenceCategory android:title="Application Information">
+  
+	</PreferenceCategory>
+  
+</PreferenceScreen>

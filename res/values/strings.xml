@@ -4,4 +4,6 @@
     <string name="notfound">No stores were found\nnear your location</string>
     <string name="navigate">Nav</string>
     <string name="call">Call</string>
+    <string name="radius">RADIUS</string>
+    <string name="delete">DELETE</string>
 </resources>

@@ -90,6 +90,15 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 		controller.cleanup();
 	}
 	
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		mapView.getOverlays().clear();
+		overlayItems.clear();
+		
+		controller.setUserOverlay();
+		
+		controller.bindData();
+	}
+	
 	public boolean onCreateOptionsMenu(Menu menu) {
 		Log.v(Program.LOG, "ListStoresActivity.onCreateOptionsMenu()");
 		
@@ -115,6 +124,8 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 				controller.centerMap();
 				return true;
 			case OPTION_SETTINGS:
+				Intent i = new Intent(this, SettingsActivity.class);
+				startActivityForResult(i, 0);
 				
 				return true;
 			default:

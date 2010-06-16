@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -92,6 +93,11 @@ public class ListStoresActivity extends ListActivity implements IListStoresView 
 		return true;
 	}
 	
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		adapter.clear();
+		controller.bindData();
+	}
+	
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Log.v(Program.LOG, "ListStoresActivity.onOptionsItemSelected()");
 		
@@ -99,6 +105,11 @@ public class ListStoresActivity extends ListActivity implements IListStoresView 
 			case OPTION_REFRESH:
 				adapter.clear();
 				controller.refreshStores();
+				return true;
+			case OPTION_SETTINGS:
+				Intent i = new Intent(this, SettingsActivity.class);
+				startActivityForResult(i, 0);
+				
 				return true;
 			default:
 				

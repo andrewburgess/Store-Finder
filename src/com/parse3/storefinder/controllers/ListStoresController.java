@@ -10,6 +10,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.parse3.storefinder.Program;
+import com.parse3.storefinder.R;
 import com.parse3.storefinder.StoreFinderApplication;
 import com.parse3.storefinder.models.Database;
 import com.parse3.storefinder.models.Store;
@@ -27,6 +28,8 @@ public class ListStoresController {
 	private class DatabaseSearcher implements Runnable {
 		@Override
 		public void run() {
+			int radius = view.getContext().getSharedPreferences(Program.PREFS, 0).getInt(view.getContext().getResources().getString(R.string.radius), 20);
+			
 			Location l = StoreFinderApplication.getLocationManager().getLastKnownLocation(LocationManager.GPS_PROVIDER);
 			
 			if (l == null) {
@@ -54,7 +57,7 @@ public class ListStoresController {
 				Location.distanceBetween(lat, lon, latitude, longitude, results);
 				double distance = results[0] * Program.MILES_PER_METER;
 				
-				if (distance > 15)				//Make user customizable search distance
+				if (distance > radius)				//Make user customizable search distance
 					continue;
 				
 				Store store = new Store();
