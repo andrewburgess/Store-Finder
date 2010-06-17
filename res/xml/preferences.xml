@@ -20,9 +20,5 @@
 		/>
 		
 	</PreferenceCategory>
-  
-	<PreferenceCategory android:title="Application Information">
-  
-	</PreferenceCategory>
-  
+	
 </PreferenceScreen>
