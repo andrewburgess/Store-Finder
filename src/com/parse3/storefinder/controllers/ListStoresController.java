@@ -1,5 +1,7 @@
 package com.parse3.storefinder.controllers;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Handler;
@@ -8,6 +10,7 @@ import android.util.Log;
 
 import com.parse3.storefinder.Program;
 import com.parse3.storefinder.StoreFinderApplication;
+import com.parse3.storefinder.models.Database;
 import com.parse3.storefinder.models.DatabaseSearcher;
 import com.parse3.storefinder.models.Store;
 import com.parse3.storefinder.models.StoreRefresher;
@@ -18,6 +21,8 @@ public class ListStoresController {
 	
 	private Handler handler = new Handler() {
 		public void handleMessage(Message msg) {
+			Log.v(Program.LOG, "ListStoresController.handler.handleMessage()");
+			
 			switch (msg.what) {
 				case DatabaseSearcher.WHAT_SEARCHDB:
 					Store s = (Store) msg.getData().getSerializable("store");
@@ -63,5 +68,26 @@ public class ListStoresController {
 		
 		view.showDialog();
 		new Thread(new StoreRefresher(view.getContext(), handler)).start();
+	}
+
+	public Store getStore(int id) {
+		SQLiteDatabase db = new Database(view.getContext()).open().getDatabase();
+		
+		Cursor c = db.query("store", new String[] {"_id", "name", "address", "city", "state", "zip", "phone"}, 
+							"_id = " + id, 
+							null, null, null, null);
+		
+		c.moveToFirst();
+		if (c.getCount() == 0)
+			return null;
+		
+		Store store = new Store();
+		store.setId(c.getInt(0));
+		store.setName(c.getString(1));
+		store.setAddress(c.getString(2));
+		store.setCitystate(c.getString(3) + ", " + c.getString(4) + " " + c.getString(5));
+		store.setPhone(c.getString(6));
+		
+		return store;
 	}
 }

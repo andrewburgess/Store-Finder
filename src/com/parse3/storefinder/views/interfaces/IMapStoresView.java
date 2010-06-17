@@ -17,5 +17,7 @@ public interface IMapStoresView {
 	void hideDialog();
 	void showDialog();
 	void displayOverlays();
+	void mapClick();
+	void centerOverlays();
 
 }

@@ -4,11 +4,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.parse3.storefinder.Program;
 import com.parse3.storefinder.R;
@@ -26,6 +26,8 @@ public class DatabaseSearcher implements Runnable {
 	private Handler handler;
 	
 	public DatabaseSearcher(Context context, Handler handler) {
+		Log.v(Program.LOG, "DatabaseSearcher._construct()");
+		
 		this.context = context;
 		this.handler = handler;
 		
@@ -34,12 +36,11 @@ public class DatabaseSearcher implements Runnable {
 
 	@Override
 	public void run() {
+		Log.v(Program.LOG, "DatabaseSearcher.run()");
+		
 		double radius = PreferenceManager.getDefaultSharedPreferences(context).getInt(context.getResources().getString(R.string.radius), 20);
 		
-		Location l = StoreFinderApplication.getLocationManager().getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		if (l == null) {
-			l = StoreFinderApplication.getLocationManager().getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		}
+		Location l = StoreFinderApplication.getLastKnownLocation();
 		
 		double lat = l.getLatitude();
 		double lon = l.getLongitude();
@@ -73,6 +74,11 @@ public class DatabaseSearcher implements Runnable {
 				store.setCitystate(c.getString(3) + ", " + c.getString(4) + " " + c.getString(5));
 				store.setPhone(c.getString(6));
 				store.setDistance(distance);
+				
+				Location loc = new Location("");
+				loc.setLatitude(latitude);
+			 	loc.setLongitude(longitude);
+			 	store.setLocation(loc);
 				
 				Message msg = new Message();
 				Bundle b = new Bundle();

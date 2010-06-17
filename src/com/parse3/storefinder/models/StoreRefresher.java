@@ -14,12 +14,14 @@ public class StoreRefresher implements Runnable {
 	private Handler handler;
 	
 	public StoreRefresher(Context context, Handler handler) {
+		Log.v(Program.LOG, "StoreRefresher._construct()");
+		
 		this.context = context;
 		this.handler = handler;
 	}
 	
 	public void run() {
-		Log.i(Program.LOG, "downloadStoresThread.run()");
+		Log.v(Program.LOG, "StoreRefresher.run()");
 		
 		Message m = new Message();
 		

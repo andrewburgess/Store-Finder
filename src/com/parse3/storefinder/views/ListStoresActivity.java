@@ -7,16 +7,22 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemClickListener;
 
 import com.parse3.storefinder.Program;
 import com.parse3.storefinder.R;
@@ -27,6 +33,10 @@ import com.parse3.storefinder.views.interfaces.IListStoresView;
 public class ListStoresActivity extends ListActivity implements IListStoresView {
 	private static final int OPTION_REFRESH = 0;
 	private static final int OPTION_SETTINGS = 1;
+	
+	private static final int LIST = 0;
+	private static final int LIST_NAVIGATE = 0;
+	private static final int LIST_CALL = 1;
 	
 	private ListStoresController controller;
 	private StoreListAdapter adapter;
@@ -74,20 +84,20 @@ public class ListStoresActivity extends ListActivity implements IListStoresView 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		Log.v(Program.LOG, "ListStoresActivity.onCreate()");
+		Log.i(Program.LOG, "ListStoresActivity.onCreate()");
 		
 		setContentView(R.layout.list_stores);
 		
 		adapter = new StoreListAdapter(this, R.id.name);
 		setListAdapter(adapter);
+		registerForContextMenu(getListView());
 		
 		controller = new ListStoresController(this);
-		
 		controller.bindData();
 	}
 	
 	public boolean onCreateOptionsMenu(Menu menu) {
-		Log.v(Program.LOG, "ListStoresActivity.onCreateOptionsMenu()");
+		Log.i(Program.LOG, "ListStoresActivity.onCreateOptionsMenu()");
 		
 		menu.add(0, OPTION_REFRESH, 0, "Refresh").setIcon(android.R.drawable.ic_menu_rotate);
 		menu.add(0, OPTION_SETTINGS, 1, "Settings").setIcon(android.R.drawable.ic_menu_preferences);
@@ -95,8 +105,41 @@ public class ListStoresActivity extends ListActivity implements IListStoresView 
 	}
 	
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.i(Program.LOG, "ListStoresActivity.onActivityResult()");
+		
 		adapter.clear();
 		controller.bindData();
+	}
+	
+	public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfo) {		
+		menu.setHeaderTitle("Store Options");
+		menu.add(LIST, LIST_NAVIGATE, LIST_NAVIGATE, "Navigate Here");
+		menu.add(LIST, LIST_CALL, LIST_CALL, "Call Store");
+	}
+	
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo)item.getMenuInfo();
+		
+		Store s = controller.getStore((int)info.id);
+		
+		if (s == null)
+			return false;
+		
+		switch (item.getItemId()) {
+			case LIST_NAVIGATE:
+				Uri navigateUri = Uri.parse("google.navigation:q=" + Uri.encode(s.getAddress() + " " + s.getCitystate()));
+				startActivity(new Intent(Intent.ACTION_VIEW, navigateUri));
+				
+				return true;
+			case LIST_CALL:
+				Uri callUri = Uri.parse("tel:" + Uri.encode(s.getPhone()));
+				startActivity(new Intent(Intent.ACTION_DIAL, callUri));				
+				
+				return true;
+			default:
+				
+				return false;
+		}
 	}
 	
 	public boolean onOptionsItemSelected(MenuItem item) {

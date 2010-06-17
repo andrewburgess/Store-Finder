@@ -16,7 +16,7 @@ public class FinderTabsActivity extends TabActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		Log.v(Program.LOG, "FinderTabsActivity.onCreate()");
+		Log.i(Program.LOG, "FinderTabsActivity.onCreate()");
 		
 		setContentView(R.layout.finder_tabs);
 		
@@ -42,6 +42,17 @@ public class FinderTabsActivity extends TabActivity {
 	public void onPause() {
 		super.onPause();
 		
+		Log.i(Program.LOG, "FinderTabsActivity.onPause()");
+		
 		StoreFinderApplication.stopLocationService();
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		
+		Log.i(Program.LOG, "FinderTabsActivity.onResume()");
+		
+		StoreFinderApplication.startLocationService();
 	}
 }

@@ -54,6 +54,8 @@ public class StoreFinderApplication extends Application implements LocationListe
 	}
 	
 	public static LocationManager getLocationManager() {
+		Log.v(Program.LOG, "StoreFinderApplication.getLocationManager()");
+		
 		return locationManager;
 	}
 	
@@ -64,5 +66,27 @@ public class StoreFinderApplication extends Application implements LocationListe
 			locationManager.removeUpdates(app);
 			listening = false;
 		}
+	}
+
+	public static Location getLastKnownLocation() {
+		Log.v(Program.LOG, "StoreFinderApplication.getLastKnownLocation()");
+		
+		Location l = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		if (l == null) {
+			l = StoreFinderApplication.getLocationManager().getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		}
+		
+		return l;
+	}
+
+	public static void startLocationService() {
+		Log.v(Program.LOG, "StoreFinderApplication.startLocationService()");
+		
+		if (listening == false) {
+			locationManager = (LocationManager)app.getSystemService(Context.LOCATION_SERVICE);
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, app);
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, app);
+			listening = true;
+		}	
 	}
 }

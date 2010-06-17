@@ -18,6 +18,7 @@ import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
@@ -28,6 +29,7 @@ import com.parse3.storefinder.R;
 import com.parse3.storefinder.StoreOverlayItem;
 import com.parse3.storefinder.controllers.MapStoresController;
 import com.parse3.storefinder.models.Store;
+import com.parse3.storefinder.views.controls.FinderMapView;
 import com.parse3.storefinder.views.interfaces.IMapStoresView;
 
 public class MapStoresActivity extends MapActivity implements IMapStoresView {
@@ -36,7 +38,7 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 	private static final int OPTION_SETTINGS = 2;
 	
 	private MapStoresController controller;
-	private MapView mapView;
+	private FinderMapView mapView;
 	private Dialog dialog;
 	private StoreOverlayItems overlayItems;
 	
@@ -71,11 +73,12 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		Log.v(Program.LOG, "MapStoresActivity.onCreate()");
+		Log.i(Program.LOG, "MapStoresActivity.onCreate()");
 		
 		setContentView(R.layout.map_stores);
 		
-		mapView = (MapView)findViewById(R.id.mapview);
+		mapView = (FinderMapView)findViewById(R.id.mapview);
+		mapView.setView(this);
 		overlayItems = new StoreOverlayItems(getResources().getDrawable(R.drawable.marker));
 		mapView.setBuiltInZoomControls(true);
 		mapView.setOnClickListener(mapViewOnClickListener);
@@ -88,10 +91,21 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 	public void onPause() {
 		super.onPause();
 		
+		Log.i(Program.LOG, "MapStoresActivity.onPause()");
+		
 		controller.cleanup();
 	}
 	
+	@Override
+	public void onResume() {
+		super.onResume();
+		
+		controller.startUserLocationFinder();
+	}
+	
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.i(Program.LOG, "MapStoresActivity.onActivityResult()");
+		
 		mapView.getOverlays().clear();
 		overlayItems.clear();
 		
@@ -101,11 +115,11 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 	}
 	
 	public boolean onCreateOptionsMenu(Menu menu) {
-		Log.v(Program.LOG, "ListStoresActivity.onCreateOptionsMenu()");
+		Log.i(Program.LOG, "ListStoresActivity.onCreateOptionsMenu()");
 		
 		menu.add(0, OPTION_REFRESH, 2, "Refresh").setIcon(android.R.drawable.ic_menu_rotate);
 		menu.add(0, OPTION_SETTINGS, 1, "Settings").setIcon(android.R.drawable.ic_menu_preferences);
-		menu.add(0, OPTION_MYLOCATION, 0, "My Location").setIcon(android.R.drawable.ic_menu_mylocation);
+		menu.add(0, OPTION_MYLOCATION, 0, "Center Results").setIcon(android.R.drawable.ic_menu_mylocation);
 		return true;
 	}
 	
@@ -122,7 +136,7 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 				controller.refreshStores();
 				return true;
 			case OPTION_MYLOCATION:
-				controller.centerMap();
+				centerOverlays();
 				return true;
 			case OPTION_SETTINGS:
 				Intent i = new Intent(this, SettingsActivity.class);
@@ -168,6 +182,45 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 	public void addOverlay(StoreOverlayItem overlayItem) {
 		overlayItems.addOverlay(overlayItem);
 	}
+	
+	@Override
+	public void centerOverlays() {
+		int minLat = 81 * MapStoresController.MAP_SCALE;
+		int maxLat = -81 * MapStoresController.MAP_SCALE;
+		int minLon = 181 * MapStoresController.MAP_SCALE;
+		int maxLon = -181 * MapStoresController.MAP_SCALE;
+		
+		for (int i = 0; i < overlayItems.size(); i++) {
+			Store s = overlayItems.getItem(i).getStore();
+			minLat = (int) ((minLat > (s.getLocation().getLatitude() * MapStoresController.MAP_SCALE)) ? 
+																						s.getLocation().getLatitude() * MapStoresController.MAP_SCALE :
+																						minLat);
+			maxLat = (int) ((maxLat < (s.getLocation().getLatitude() * MapStoresController.MAP_SCALE)) ? 
+																						s.getLocation().getLatitude() * MapStoresController.MAP_SCALE :
+																						maxLat);
+			minLon = (int) ((minLon > (s.getLocation().getLongitude() * MapStoresController.MAP_SCALE)) ? 
+																						s.getLocation().getLongitude() * MapStoresController.MAP_SCALE :
+																						minLon);
+			maxLon = (int) ((maxLon < (s.getLocation().getLongitude() * MapStoresController.MAP_SCALE)) ? 
+																						s.getLocation().getLongitude() * MapStoresController.MAP_SCALE :
+																						maxLon);
+		}
+		
+		GeoPoint gp = controller.getUserLocation();
+		
+		minLat = (minLat > gp.getLatitudeE6()) ? gp.getLatitudeE6() : minLat;
+		maxLat = (maxLat < gp.getLatitudeE6()) ? gp.getLatitudeE6() : maxLat;
+		minLon = (minLon > gp.getLongitudeE6()) ? gp.getLongitudeE6() :	minLon;
+		maxLon = (maxLon < gp.getLongitudeE6()) ? gp.getLongitudeE6() :	maxLon;
+		
+		mapView.getController().zoomToSpan((maxLat - minLat), (maxLon - minLon));
+		mapView.getController().animateTo(new GeoPoint((maxLat + minLat) / 2, (maxLon + minLon) / 2));
+	}
+	
+	@Override
+	public void displayOverlays() {
+		mapView.getOverlays().add(overlayItems);
+	}
 
 	@Override
 	public void hideDialog() {
@@ -181,8 +234,9 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 	}
 	
 	@Override
-	public void displayOverlays() {
-		mapView.getOverlays().add(overlayItems);
+	public void mapClick() {
+		((View)findViewById(R.id.popup)).setVisibility(View.GONE);
+		overlayItems.onTap(-1);
 	}
 	
 	public void overlayTapped(int index) {
@@ -254,7 +308,9 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 		
 		@Override
 		public boolean onTap(int index) {
-			overlays.get(index).setMarker(boundCenterBottom(getResources().getDrawable(R.drawable.marker_highlight)));
+			if (index >= 0) {
+				overlays.get(index).setMarker(boundCenterBottom(getResources().getDrawable(R.drawable.marker_highlight)));
+			}
 			
 			if (lastIndex >= 0) {
 				overlays.get(lastIndex).setMarker(boundCenterBottom(getResources().getDrawable(R.drawable.marker)));
@@ -262,7 +318,8 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 			
 			lastIndex = index;
 			
-			overlayTapped(index);
+			if (index >= 0)
+				overlayTapped(index);
 			
 			return true;
 		}

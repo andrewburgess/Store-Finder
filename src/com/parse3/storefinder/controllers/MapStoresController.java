@@ -1,5 +1,6 @@
 package com.parse3.storefinder.controllers;
 
+import android.location.Location;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -7,6 +8,7 @@ import android.util.Log;
 import com.google.android.maps.GeoPoint;
 import com.parse3.storefinder.LocationFinder;
 import com.parse3.storefinder.Program;
+import com.parse3.storefinder.StoreFinderApplication;
 import com.parse3.storefinder.StoreOverlayItem;
 import com.parse3.storefinder.models.DatabaseSearcher;
 import com.parse3.storefinder.models.Store;
@@ -14,7 +16,7 @@ import com.parse3.storefinder.models.StoreRefresher;
 import com.parse3.storefinder.views.interfaces.IMapStoresView;
 
 public class MapStoresController {
-	private static final int MAP_SCALE = 1000000;
+	public static final int MAP_SCALE = (int) 1E6;
 	
 	private IMapStoresView view;
 	private LocationFinder userLocation;
@@ -25,14 +27,15 @@ public class MapStoresController {
 		public void run() {
 			Log.v(Program.LOG, "MapStoresController.locationFixed.run()");
 			
-			view.getMapController().animateTo(userLocation.getMyLocation());
-			view.getMapController().setZoom(15);
+			view.centerOverlays();
 		}
 		
 	};
 	
 	private Handler handler = new Handler() {
 		public void handleMessage(Message msg) {
+			Log.v(Program.LOG, "MapStoresController.handler.handleMessage()");
+			
 			switch (msg.what) {
 				case DatabaseSearcher.WHAT_SEARCHDB:
 					Store s = (Store) msg.getData().getSerializable("store");
@@ -47,6 +50,7 @@ public class MapStoresController {
 					view.hideDialog();
 					break;
 				case DatabaseSearcher.WHAT_FINISHEDSEARCH:
+					view.centerOverlays();
 					view.displayOverlays();
 					break;
 				default:
@@ -60,12 +64,18 @@ public class MapStoresController {
 		
 		this.view = view;
 		
-		userLocation = new LocationFinder(view.getContext(), view.getMapView());
-		userLocation.enableMyLocation();
-		userLocation.enableCompass();
-		userLocation.runOnFirstFix(locationFixed);
-		
-		view.addOverlay(userLocation);
+		startUserLocationFinder();
+	}
+	
+	public void startUserLocationFinder() {
+		if (userLocation == null || userLocation.isMyLocationEnabled() == false) {
+			userLocation = new LocationFinder(view.getContext(), view.getMapView());
+			userLocation.enableMyLocation();
+			userLocation.enableCompass();
+			userLocation.runOnFirstFix(locationFixed);
+			
+			view.addOverlay(userLocation);
+		}
 	}
 
 	public void cleanup() {
@@ -89,10 +99,22 @@ public class MapStoresController {
 	}
 
 	public void setUserOverlay() {
+		Log.v(Program.LOG, "MapStoresController.setUserOverlay()");
+		
 		view.addOverlay(userLocation);
 	}
 
-	public void centerMap() {
-		view.getMapController().animateTo(userLocation.getMyLocation());
+	public GeoPoint getUserLocation() {
+		Log.v(Program.LOG, "MapStoresController.getUserLocation()");
+		
+		GeoPoint gp;
+		
+		gp = userLocation.getMyLocation();
+		if (gp == null) {
+			Location l = StoreFinderApplication.getLastKnownLocation();
+			gp = new GeoPoint((int)(l.getLatitude() * MapStoresController.MAP_SCALE), (int)(l.getLongitude() * MapStoresController.MAP_SCALE));
+		}
+		
+		return gp;
 	}
 }

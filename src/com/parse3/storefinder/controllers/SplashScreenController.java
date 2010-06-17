@@ -19,7 +19,7 @@ public class SplashScreenController {
 	
 	private Thread downloadStoresThread = new Thread() {
 		public void run() {
-			Log.i(Program.LOG, "downloadStoresThread.run()");
+			Log.v(Program.LOG, "SplashScreenController.downloadStoresThread.run()");
 			
 			Message m = new Message();
 			

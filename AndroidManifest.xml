@@ -11,7 +11,7 @@
     		</intent-filter>
     	</activity>
 	<uses-library android:name="com.google.android.maps"></uses-library>
-<activity android:name=".views.FinderTabsActivity"></activity>
+<activity android:name=".views.FinderTabsActivity" android:launchMode="singleTask"></activity>
 <activity android:name=".views.ListStoresActivity"></activity>
 <activity android:name=".views.MapStoresActivity"></activity>
 

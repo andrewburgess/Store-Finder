@@ -12,6 +12,12 @@
 			android:defaultValue="20"
 			android:text=" miles"
 			android:max="80" />
+			
+		<com.parse3.storefinder.views.controls.DeleteStoresPreference
+			android:key="delete"
+			android:title="Delete Saved Stores"
+			android:summary="Delete all of the stores saved in the cache"
+		/>
 		
 	</PreferenceCategory>
   
