@@ -1,6 +1,7 @@
 package com.parse3.storefinder.models;
 
 import android.content.Context;
+import android.location.Location;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -12,12 +13,14 @@ public class StoreRefresher implements Runnable {
 	
 	private Context context;
 	private Handler handler;
+	private Location location;
 	
-	public StoreRefresher(Context context, Handler handler) {
+	public StoreRefresher(Context context, Handler handler, Location location) {
 		Log.v(Program.LOG, "StoreRefresher._construct()");
 		
 		this.context = context;
 		this.handler = handler;
+		this.location = location;
 	}
 	
 	public void run() {
@@ -26,7 +29,7 @@ public class StoreRefresher implements Runnable {
 		Message m = new Message();
 		
 		StoreDownloader downloader = new StoreDownloader(context);
-		downloader.downloadStores();
+		downloader.downloadStores(location);
 		
 		m.what = WHAT_DOWNLOAD;
 				

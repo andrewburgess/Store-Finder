@@ -12,7 +12,7 @@ public class Program {
 	}
 	
 	public static class StoreDownloaderInfo {
-		public static final String URL = "http://deceptacle.com/stores_new.json";
+		public static final String URL = "http://deceptacle.com/store/get?latitude=%f&longitude=%f&radius=%d&format=json";
 		public static final int BUFFER = 1024;
 	}
 	

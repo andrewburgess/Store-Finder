@@ -67,7 +67,7 @@ public class ListStoresController {
 		Log.v(Program.LOG, "ListStoresController.refreshStores()");
 		
 		view.showDialog();
-		new Thread(new StoreRefresher(view.getContext(), handler)).start();
+		new Thread(new StoreRefresher(view.getContext(), handler, StoreFinderApplication.getLastKnownLocation())).start();
 	}
 
 	public Store getStore(int id) {

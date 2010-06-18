@@ -18,11 +18,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.parse3.storefinder.Program;
+import com.parse3.storefinder.R;
 
 public class StoreDownloader {
 	private Context context;
@@ -38,16 +41,19 @@ public class StoreDownloader {
 		db = database.getDatabase();
 	}
 	
-	public void downloadStores() {
+	public void downloadStores(Location l) {
 		Log.v(Program.LOG, "StoreDownloader.downloadStores()");
 		
 		NetworkInfo mobile = ((ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE)).getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
 		NetworkInfo wifi = ((ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE)).getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
 		if (mobile.getState() == NetworkInfo.State.CONNECTED || wifi.getState() == NetworkInfo.State.CONNECTED) {
+			int radius = PreferenceManager.getDefaultSharedPreferences(context).getInt(context.getResources().getString(R.string.radius), 20);
+			
 			String data = "";
 			try {
-				URL u = new URL(Program.StoreDownloaderInfo.URL);
+				String url = String.format(Program.StoreDownloaderInfo.URL, l.getLatitude(), l.getLongitude(), radius);
+				URL u = new URL(url);
 				data = readData(openConnection(u));
 			} catch (MalformedURLException e) {
 				Log.e(Program.LOG, "ERROR: downloadStores - " + e.getMessage());
@@ -56,8 +62,7 @@ public class StoreDownloader {
 			try {
 				ContentValues cv;
 				Geocoder gc = new Geocoder(context, Locale.getDefault());
-				JSONObject json = new JSONObject(data);
-				JSONArray jStores = json.getJSONArray("store");
+				JSONArray jStores = new JSONArray(data);
 				for (int i = 0; i < jStores.length(); i++) {
 					JSONObject jStore = jStores.getJSONObject(i);
 					

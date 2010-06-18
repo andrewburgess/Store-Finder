@@ -95,7 +95,7 @@ public class MapStoresController {
 		Log.v(Program.LOG, "MapStoresController.refreshStores()");
 		
 		view.showDialog();
-		new Thread(new StoreRefresher(view.getContext(), handler)).start();
+		new Thread(new StoreRefresher(view.getContext(), handler, StoreFinderApplication.getLastKnownLocation())).start();
 	}
 
 	public void setUserOverlay() {

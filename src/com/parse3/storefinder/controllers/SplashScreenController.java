@@ -8,6 +8,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.parse3.storefinder.Program;
+import com.parse3.storefinder.StoreFinderApplication;
 import com.parse3.storefinder.models.Database;
 import com.parse3.storefinder.models.StoreDownloader;
 import com.parse3.storefinder.views.FinderTabsActivity;
@@ -24,7 +25,7 @@ public class SplashScreenController {
 			Message m = new Message();
 			
 			StoreDownloader downloader = new StoreDownloader(view.getContext());
-			downloader.downloadStores();
+			downloader.downloadStores(StoreFinderApplication.getLastKnownLocation());
 			
 			SharedPreferences prefs = view.getContext().getSharedPreferences(Program.PREFS, 0);
 			

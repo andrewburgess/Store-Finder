@@ -108,6 +108,8 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 		
 		mapView.getOverlays().clear();
 		overlayItems.clear();
+		((View)findViewById(R.id.popup)).setVisibility(View.GONE);
+		overlayItems.onTap(-1);
 		
 		controller.setUserOverlay();
 		
