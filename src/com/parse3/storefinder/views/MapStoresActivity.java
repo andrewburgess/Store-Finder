@@ -307,6 +307,8 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 			Log.v(Program.LOG, "StoreOverlayItems.clear()");
 			
 			overlays.clear();
+			
+			setLastFocusedIndex(-1);
 			populate();
 		}
 		
