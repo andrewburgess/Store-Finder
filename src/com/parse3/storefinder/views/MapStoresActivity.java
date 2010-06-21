@@ -281,6 +281,7 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 			Log.i(Program.LOG, "StoreOverlayItems._construct()");
 			
 			lastIndex = -1;
+			populate();
 		}
 
 		@Override

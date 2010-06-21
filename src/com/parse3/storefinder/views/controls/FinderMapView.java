@@ -35,8 +35,6 @@ public class FinderMapView extends MapView {
 			lastAction = MotionEvent.ACTION_DOWN;
 		}
 		
-		
-		
 		return super.onInterceptTouchEvent(ev);
 	}
 	
