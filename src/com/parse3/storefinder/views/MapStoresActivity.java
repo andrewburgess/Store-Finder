@@ -306,7 +306,8 @@ public class MapStoresActivity extends MapActivity implements IMapStoresView {
 		public void clear() {
 			Log.v(Program.LOG, "StoreOverlayItems.clear()");
 			
-			overlays.clear();		
+			overlays.clear();
+			populate();
 		}
 		
 		@Override
